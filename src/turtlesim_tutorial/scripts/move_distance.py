@@ -5,14 +5,16 @@ from turtlesim.msg import Pose
 import sys
 
 robot_x = 0
+robot_y = 0
 
 def pose_callback(pose):
-	global robot_x
-	rospy.loginfo("Robot X = %f\n",pose.x)
+	global robot_x, robot_y
 	robot_x = pose.x
+    robot_y = pose.y
+    rospy.loginfo("Robot X = %f\t Robot Y = %f\n",pose.x, pose.y)
 
 def move_turtle(lin_vel,ang_vel,distance):
-    global robot_x
+    global robot_x, robot_y
     pub = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
     rospy.Subscriber('/turtle1/pose',Pose, pose_callback)
     rate = rospy.Rate(10) # 10hz
@@ -25,8 +27,8 @@ def move_turtle(lin_vel,ang_vel,distance):
         vel.angular.y = 0
         vel.angular.z = ang_vel
  
-        if(robot_x >= distance):
-            rospy.loginfo("Robot Reached destination")
+        if(robot_x >= distance or robot_y >= distance):
+            rospy.loginfo("Robot hits a wall")
             rospy.logwarn("Stopping robot")
             break
         pub.publish(vel)
